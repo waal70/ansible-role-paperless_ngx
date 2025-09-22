@@ -12,8 +12,7 @@ galaxy_info:
   min_ansible_version: "2.1"
 
   galaxy_tags: [debian,
-                paperless,
-                paperless-ngx
+                paperless
   ]
 
 dependencies: []
