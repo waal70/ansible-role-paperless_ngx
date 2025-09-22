@@ -11,20 +11,6 @@
     opts: "uid=0,credentials=/media/.creds,iocharset=utf8,vers=3.0,noperm,x-systemd.automount,x-systemd.idle-timeout=30,x-systemd.mount-timeout=10"
     state: mounted
 
-- name: "Get config information from {{ ppl_endpoint }}"
-  ansible.builtin.uri:
-    url: "{{ ppl_endpoint }}config/"
-    method: GET
-    headers:
-      Authorization: "Token {{ auth_token }}"
-    validate_certs: false
-  register: get_stack_response
-  when: auth_token is defined
-
-# - name: "Debug get_stack_response from paperless-ngx"
-#   ansible.builtin.debug:
-#     var: get_stack_response
-
 - name: "Set some config on {{ ppl_endpoint }}"
   ansible.builtin.uri:
     url: "{{ ppl_endpoint }}config/1/"
