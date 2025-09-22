@@ -1,0 +1,64 @@
+---
+  #   wf_name: "{{ item[0] }}"
+  #   wf_filter: "{{ item[1] }}"
+  #   wf_doctype: "{{ item[2] }}"
+  #   wf_correspondent: "{{ item[3] }}"
+  #   wf_sp: "{{ item[4] }}"
+  #   wf_triggertype: 1
+
+- name: "Populate the JMESPath query strings"
+  block:
+    - name: "Populate document type for {{ wf_doctype }}"
+      ansible.builtin.set_fact:
+        q_doctype_id: "results[?name==`{{ wf_doctype }}`].id"
+      when: wf_doctype != ''
+    - name: "Populate correspondent for {{ wf_correspondent }}"
+      ansible.builtin.set_fact:
+        q_correspondent_id: "results[?name==`{{ wf_correspondent }}`].id"
+      when: wf_correspondent != ''
+    - name: "Populate storage path for {{ wf_sp }}"
+      ansible.builtin.set_fact:
+        q_sp_id: "results[?name==`{{ wf_sp }}`].id"
+      when: wf_sp != ''
+### END BLOCK
+
+- name: "Debug the combination of ids to set for workflow {{ wf_name }}"
+  ansible.builtin.debug:
+    msg:
+      - "Document type for {{ wf_doctype }} is {{ doc_types_response.json | community.general.json_query(q_doctype_id) | first | default('') }}"
+      - "Storage path type for {{ wf_sp }} is {{ sp_response.json | community.general.json_query(q_sp_id) | first | default('') }}"
+      - "Correspondents type for {{ wf_correspondent }} is {{ correspondents_response.json | community.general.json_query(q_correspondent_id) | first | default('') }}" # noqa: yaml[line-length]
+
+- name: "Creating workflow {{ wf_name }}"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}workflows/"
+    method: POST
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body: {
+      "name": "{{ wf_name }}",
+      "enabled": true,
+      "triggers": [
+        {
+          "type": "{{ wf_triggertype }}",
+          "filter_path": "{{ wf_filter }}"
+        }
+      ],
+      "actions": [
+        {
+          "type": 1,
+          "assign_document_type": "{{ doc_types_response.json | community.general.json_query(q_doctype_id) | first | default('') }}",
+          "assign_storage_path": "{{ sp_response.json | community.general.json_query(q_sp_id) | first | default('') }}",
+          "assign_correspondent": "{{ correspondents_response.json | community.general.json_query(q_correspondent_id) | first | default('') }}"
+        }
+      ]
+    }
+    status_code:
+      - 201
+  when: "(wf_name not in wf_response.json.results | map(attribute='name') | list)"
+  register: _result
+  until: _result.status == 201
+  retries: 3
+  delay: 5

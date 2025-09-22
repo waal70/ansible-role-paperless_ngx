@@ -1,0 +1,17 @@
+---
+- name: "Creating Correspondent {{ correspondent_name }}"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}correspondents/"
+    method: POST
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body:
+      "name": "{{ correspondent_name }}"
+      "matching_algorithm": "{{ matchalgorithm }}"
+      "is_insensitive": true
+      "owner": "{{ ppl_owner }}"
+    status_code:
+      - 201
+  when: "(correspondent_name not in correspondents_response.json.results | map(attribute='name') | list)"

@@ -1,0 +1,21 @@
+---
+- name: "Populate a variable with all currently known Storage Paths"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}storage_paths/"
+    method: GET
+    validate_certs: false
+    headers:
+      Authorization: "Token {{ auth_token }}"
+  register: sp_response
+
+- name: "Debug Storage Paths names"
+  ansible.builtin.debug:
+    var: sp_response.json.results | map(attribute='name') | list
+
+- name: "Create Storage Paths"
+  ansible.builtin.include_tasks: sp.yml
+  vars:
+    sp_name: "{{ item[0] }}"
+    sp_path: "{{ item[1] }}"
+  with_items:
+    - "{{ storagepaths }}"

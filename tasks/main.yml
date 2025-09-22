@@ -1,0 +1,86 @@
+---
+- name: Include vaulted password file
+  ansible.builtin.include_vars:
+    file: ../home/ansible-vault/paperless-vars.yml
+
+- name: "Ensure fstab contains CIFS for consume folder"
+  ansible.posix.mount:
+    path: "{{ cifs_path }}"
+    src: "{{ cifs_src }}"
+    fstype: cifs
+    opts: "uid=0,credentials=/media/.creds,iocharset=utf8,vers=3.0,noperm,x-systemd.automount,x-systemd.idle-timeout=30,x-systemd.mount-timeout=10"
+    state: mounted
+
+- name: "Get config information from {{ ppl_endpoint }}"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}config/"
+    method: GET
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+  register: get_stack_response
+  when: auth_token is defined
+
+# - name: "Debug get_stack_response from paperless-ngx"
+#   ansible.builtin.debug:
+#     var: get_stack_response
+
+- name: "Set some config on {{ ppl_endpoint }}"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}config/1/"
+    method: PATCH
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body:
+      "rotate_pages": true
+      "rotate_pages_threshold": 10
+      "language": "nld"
+      "output_type": "pdfa"
+      "mode": "skip"
+      "skip_archive_file": "never"
+      "unpaper_clean": "clean"
+      "color_conversion_strategy": "LeaveColorUnchanged"
+
+- name: "Get existing custom fields"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}custom_fields/"
+    method: GET
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+  register: cf_response
+
+- name: "Create custom field for cleansing later on"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}custom_fields/"
+    method: POST
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body:
+      "name": "{{ cleansetag }}"
+      "data_type": "boolean"
+    status_code:
+      - 201
+  when: "(cleansetag not in cf_response.json.results | map(attribute='name') | list)"
+
+- name: "Include tasks to handle document types"
+  ansible.builtin.include_tasks: doc_type_main.yml
+
+- name: "Include tasks to handle correspondents"
+  ansible.builtin.include_tasks: correspondent_main.yml
+
+- name: "Include tasks to handle tags"
+  ansible.builtin.include_tasks: tags_main.yml
+
+- name: "Include tasks to create Storage Paths"
+  ansible.builtin.include_tasks: sp_main.yml
+
+- name: "Include tasks to create workflows"
+  ansible.builtin.include_tasks: wf_main.yml
+
+- name: "Include task to cleanse document titles"
+  ansible.builtin.include_tasks: cleanse_doc_titles.yml

@@ -1,0 +1,21 @@
+---
+- name: "Populate a variable with all currently known correspondents"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}correspondents/"
+    method: GET
+    validate_certs: false
+    headers:
+      Authorization: "Token {{ auth_token }}"
+  register: correspondents_response
+
+- name: "Debug correspondents"
+  ansible.builtin.debug:
+    var: correspondents_response.json.results | map(attribute='name') | list
+
+- name: "Create correspondents"
+  ansible.builtin.include_tasks: correspondent.yml
+  vars:
+    correspondent_name: "{{ item[0] }}"
+    matchalgorithm: "{{ item[1] }}"
+  with_items:
+    - "{{ correspondents }}"

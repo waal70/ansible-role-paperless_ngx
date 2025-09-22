@@ -1,0 +1,40 @@
+---
+- name: "Populate a variable with all currently known tags"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}tags/"
+    method: GET
+    validate_certs: false
+    headers:
+      Authorization: "Token {{ auth_token }}"
+  register: tags_response
+
+- name: "Debug tags"
+  ansible.builtin.debug:
+    var: tags_response.json.results | map(attribute='name') | list
+
+- name: "Create the INBOX tag, if it does not exist yet"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}tags/"
+    method: POST
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body:
+      "name": "INBOX"
+      "color": "#ff0000"
+      "matching_algorithm": 0
+      "is_inbox_tag": true
+      "is_insensitive": true
+      "owner": "{{ ppl_owner }}"
+    status_code:
+      - 201
+  when: "('INBOX' not in tags_response.json.results | map(attribute='name') | list)"
+
+- name: "Create tags"
+  ansible.builtin.include_tasks: tags.yml
+  vars:
+    tag_name: "{{ item }}"
+    matchalgorithm: 6
+  with_items:
+    - "{{ ppl_tags }}"

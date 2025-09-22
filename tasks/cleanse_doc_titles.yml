@@ -1,0 +1,20 @@
+---
+- name: "Retrieve a list of documents that have not been cleansed yet"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}documents/?custom_field_query=%5B%22is_cleansed%22%2C%20%22exists%22%2C%20false%5D&title__icontains=_"
+    method: GET
+    validate_certs: false
+    headers:
+      Authorization: "Token {{ auth_token }}"
+  register: docs_to_cleanse_response
+
+- name: "Debug documents ids to cleanse"
+  ansible.builtin.debug:
+    var: docs_to_cleanse_response.json.all
+
+- name: "Include task to cleanse document titles"
+  ansible.builtin.include_tasks: cleanse_doc_title_by_id.yml
+  vars:
+    docid: "{{ item }}"
+  with_items:
+    - "{{ docs_to_cleanse_response.json.all }}"

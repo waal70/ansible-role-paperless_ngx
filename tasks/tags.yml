@@ -1,0 +1,18 @@
+---
+- name: "Creating Tag {{ tag_name }}"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}tags/"
+    method: POST
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body:
+      "name": "{{ tag_name }}"
+      "matching_algorithm": "{{ matchalgorithm }}"
+      "is_insensitive": true
+      "is_inbox_tag": false
+      "owner": "{{ ppl_owner }}"
+    status_code:
+      - 201
+  when: "(tag_name not in tags_response.json.results | map(attribute='name') | list)"

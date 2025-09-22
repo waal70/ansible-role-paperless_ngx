@@ -1,0 +1,17 @@
+---
+- name: "Creating Storage Path {{ sp_name }}"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}storage_paths/"
+    method: POST
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body:
+      "name": "{{ sp_name }}"
+      "path": "{{ sp_path }}"
+      "matching_algorithm": 6
+      "owner": "{{ ppl_owner }}"
+    status_code:
+      - 201
+  when: "(sp_name not in sp_response.json.results | map(attribute='name') | list)"

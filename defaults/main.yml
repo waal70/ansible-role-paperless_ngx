@@ -1,0 +1,44 @@
+---
+# defaults file for waal70.paperless-ngx
+auth_token: "auth_token_in_vaulted vars"
+# If you run this on the host where paperless-ngx is running, this should be localhost
+ppl_endpoint: http://localhost:8010/api/
+delete_all_doc_types: false
+cleansetag: "is_cleansed"
+
+# Please make sure to put the correct credentials in /media/.creds
+cifs_path: "/media/SCANS"
+cifs_src: "//172.16.10.2/SCANS"
+
+# This is the user that will own all the config, so it should be properly authorized!
+# You can find the ID by GET'ing the /api/users, which can be easily done through:
+# http://<address-of-paperless>:8010/api/schema/view/
+ppl_owner: 3
+
+doc_types: [
+  ["Type1", 6],
+  ["Type2", 6]
+]
+
+correspondents: [
+  ["Corr1", 6],
+  ["Corr2", 6]
+]
+
+# Please note that tags_main.yml sets a specific INBOX tag!
+ppl_tags: [
+  "Tag1",
+  "Tag2"
+]
+
+storagepaths: [
+  ["SP1", "PATH_ONE/{{ '{{' }} created_year {{ '}}' }}/"],
+  ["SP2", "PATH_TWO/AnotherFolder/{{ '{{' }} created_year {{ '}}' }}/"]
+]
+# These workflows follow the name value pair type of variable and trigger on "consumption started = type"
+# ["workflow_name", "filter_path", "assign_doc_type", "assign_correspondent", "assign_storage_path"]
+# Please note the required referential integrity with the values above!
+consumption_workflows: [
+  ["CWF_1", "*/foldertomatch/*", "Type1", "Corr1", "SP1"],
+  ["CWF_2", "*/anotherfolder/*", "Type2", "Corr1", "SP2"]
+]

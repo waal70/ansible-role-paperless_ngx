@@ -1,0 +1,34 @@
+---
+- name: "Populate a variable with all currently known document types"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}document_types/"
+    method: GET
+    validate_certs: false
+    headers:
+      Authorization: "Token {{ auth_token }}"
+  register: doc_types_response
+
+- name: "Debug document types"
+  ansible.builtin.debug:
+    var: doc_types_response.json.results | map(attribute='name') | list
+
+- name: "Delete all document types when this is specified"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}document_types/{{ item }}/"
+    method: DELETE
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    body_format: json
+    validate_certs: false
+    status_code:
+      - 204
+  loop: "{{ doc_types_response.json.results | map(attribute='id') | list }}"
+  when: delete_all_doc_types
+
+- name: "Create document types"
+  ansible.builtin.include_tasks: doc_type.yml
+  vars:
+    doctypename: "{{ item[0] }}"
+    matchalgorithm: "{{ item[1] }}"
+  with_items:
+    - "{{ doc_types }}"

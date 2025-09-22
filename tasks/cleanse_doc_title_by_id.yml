@@ -1,0 +1,49 @@
+---
+- name: Retrieve detailed info for document with id {{ docid }}
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}documents/{{ docid }}/"
+    method: GET
+    validate_certs: false
+    headers:
+      Authorization: "Token {{ auth_token }}"
+  register: document_info_response
+
+- name: "Debug document info response"
+  ansible.builtin.debug:
+    var: document_info_response.json
+
+- name: "Set cut-counter for old archive files"
+  ansible.builtin.set_fact:
+    cut_counter: 11
+  when: document_info_response.json.title[10] == '_'
+
+- name: "Set cut-counter for recently scanned"
+  ansible.builtin.set_fact:
+    cut_counter: 9
+  when: document_info_response.json.title[8] == '_'
+
+- name: "Set cut counter otherwise"
+  ansible.builtin.set_fact:
+    cut_counter: 0
+  when: cut_counter is not defined
+
+- name: "Update document title (cutting at {{ cut_counter }}) and set is_cleansed custom field to true for document with id {{ docid }}" # noqa: name[template]
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}documents/{{ item }}/"
+    method: PATCH
+    validate_certs: false
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    body_format: json
+    body:
+      title: "{{ document_info_response.json.title[cut_counter:] | replace('_', ' ') }}"
+      "custom_fields": [
+        {
+          "value": true,
+          "field": 1
+        }
+      ]
+  register: _result
+  until: _result.status == 200
+  retries: 3
+  delay: 5

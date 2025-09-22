@@ -1,0 +1,62 @@
+---
+##### Handle on consumption workflows first
+# Types are:
+#    1 - Consumption Started
+#    2 - Document Added
+#    3 - Document Updated
+#    4 - Scheduled
+
+- name: "Populate a variable with all currently known Workflows"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}workflows/"
+    method: GET
+    validate_certs: false
+    headers:
+      Authorization: "Token {{ auth_token }}"
+  register: wf_response
+
+- name: "Debug workflow names"
+  ansible.builtin.debug:
+    var: wf_response.json.results | map(attribute='name') | list
+
+- name: "Retrieve primary keys for document_type, storage_path and correspondent"
+  block:
+    - name: Retrieve document type
+      ansible.builtin.uri:
+        url: "{{ ppl_endpoint }}document_types/"
+        method: GET
+        validate_certs: false
+        headers:
+          Authorization: "Token {{ auth_token }}"
+      register: doc_types_response
+
+    - name: Retrieve storage paths
+      ansible.builtin.uri:
+        url: "{{ ppl_endpoint }}storage_paths/"
+        method: GET
+        validate_certs: false
+        headers:
+          Authorization: "Token {{ auth_token }}"
+      register: sp_response
+
+    - name: Retrieve correspondents
+      ansible.builtin.uri:
+        url: "{{ ppl_endpoint }}correspondents/"
+        method: GET
+        validate_certs: false
+        headers:
+          Authorization: "Token {{ auth_token }}"
+      register: correspondents_response
+### END BLOCK
+
+- name: "Create consumption workflows"
+  ansible.builtin.include_tasks: wf.yml
+  vars:
+    wf_name: "{{ item[0] }}"
+    wf_filter: "{{ item[1] }}"
+    wf_doctype: "{{ item[2] }}"
+    wf_correspondent: "{{ item[3] }}"
+    wf_sp: "{{ item[4] }}"
+    wf_triggertype: 1
+  with_items:
+    - "{{ consumption_workflows }}"

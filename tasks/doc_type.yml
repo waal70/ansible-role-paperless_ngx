@@ -1,0 +1,17 @@
+---
+- name: "Creating document type {{ doctypename }}"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}document_types/"
+    method: POST
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body:
+      "name": "{{ doctypename }}"
+      "matching_algorithm": "{{ matchalgorithm }}"
+      "is_insensitive": true
+      "owner": "{{ ppl_owner }}"
+    status_code:
+      - 201
+  when: "(doctypename not in doc_types_response.json.results | map(attribute='name') | list) or delete_all_doc_types"
