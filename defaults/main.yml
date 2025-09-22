@@ -27,8 +27,8 @@ correspondents: [
 
 # Please note that tags_main.yml sets a specific INBOX tag!
 ppl_tags: [
-  "Tag1",
-  "Tag2"
+  ["Tag1", "#302d86"],
+  ["Tag2", "#302d86"]
 ]
 
 storagepaths: [

@@ -1,4 +1,8 @@
 ---
+#    tag_name: "{{ item[0] }}"
+#    tag_colour: "{{ item[1] }}"
+#    matchalgorithm: 6
+
 - name: "Creating Tag {{ tag_name }}"
   ansible.builtin.uri:
     url: "{{ ppl_endpoint }}tags/"
@@ -9,6 +13,7 @@
     body_format: json
     body:
       "name": "{{ tag_name }}"
+      "color": "{{ tag_colour }}"
       "matching_algorithm": "{{ matchalgorithm }}"
       "is_insensitive": true
       "is_inbox_tag": false

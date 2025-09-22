@@ -34,7 +34,8 @@
 - name: "Create tags"
   ansible.builtin.include_tasks: tags.yml
   vars:
-    tag_name: "{{ item }}"
+    tag_name: "{{ item[0] }}"
+    tag_colour: "{{ item[1] | default('#000000ff') }}"
     matchalgorithm: 6
   with_items:
     - "{{ ppl_tags }}"
