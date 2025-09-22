@@ -67,6 +67,6 @@
 
 - name: "Include tasks to create workflows"
   ansible.builtin.include_tasks: wf_main.yml
-
+  
 - name: "Include task to cleanse document titles"
   ansible.builtin.include_tasks: cleanse_doc_titles.yml

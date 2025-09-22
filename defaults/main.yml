@@ -42,3 +42,8 @@ consumption_workflows: [
   ["CWF_1", "*/foldertomatch/*", "Type1", "Corr1", "SP1"],
   ["CWF_2", "*/anotherfolder/*", "Type2", "Corr1", "SP2"]
 ]
+
+tagging_workflows: [
+  ["TWF_1", "*stringintitle*", "Tag1"],
+  ["TWF_2", "*otherstring*", "Tag2"]
+]
