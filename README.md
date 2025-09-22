@@ -1,38 +1,82 @@
-Role Name
-=========
+# ansible-role-paperless-ngx
 
-A brief description of the role goes here.
+=======================
+Paperless - the best home-hosted document management system: [Documentation paperless-ngx](https://docs.paperless-ngx.com/)
 
-Requirements
-------------
+This role configures all aspects of the paperless container
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+## Tasks in Role
 
-Role Variables
---------------
+- Create Correspondents
+- Create Tags
+- Create Document Types
+- Create Workflows
+- Create Storage Paths
+- Create Custom Field
+- Performs Document Title Cleansing
+- Set OCR parameters
+- Creates a CIFS mount for your consume folder
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Work in progress!
 
-Dependencies
-------------
+## Requirements
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+- `cifs-utils`
+- Debian-based installation of paperless, through docker compose (a compose-file is provided in the project)
 
-Example Playbook
-----------------
+## Role Vars
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+name | description | default |
+-----|-------------|---------|
+| auth_token  | API token with full admin access to paperless  | none |
+| ppl_endpoint | API URL for your paperless install | http://localhost:8010/api/ |
+| delete_all_doc_types | Flag to prune DB of existing doc-types before creating new | false |
+| cleansetag | Tag name used to monitor document title cleansing | is_cleansed |
+| cifs_path | fstab path to your mount point for the consume folder | /media/SCANS |
+| cifs_src | fstab src for the consume-folder | | 192.168.1.111/SCANS |
+| ppl_owner | User id (number) for the main admin user | 3 |
+| doc_types | list containing doctypes, matchingtype to be created | ... |
+| correspondents | list containing correspondents, matchingtype to be created | ... |
+| ppl_tags | list containing tags to be created | ... |
+| storagepaths | list containing storagepaths to be created | ... |
+| consumption_workflows | list containing workflows to be created | ... |
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+*See main.yml under 'defaults' for a complete list and more description*
 
-License
+# Running the role
+
+```
+
+```
+
+## Playbook example
+
+---
+
+```
+- hosts: myhosts
+  become: true
+  vars:
+    pip_install_packages:
+      - name: docker
+  vars_files:
+    - vars/portainer.yml
+  roles:
+   - geerlingguy.docker
+   - geerlingguy.pip
+   - waal70.paperless-ngx
+```
+
+## License
+
 -------
 
-BSD
+[GPLv3](https://www.gnu.org/licenses/gpl-3.0.html#license-text)
 
-Author Information
-------------------
+## Author Information
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+-------
+
+Unless otherwise noted, this entire repository is (c) 2025 by André (waal70). [See github profile](https://github.com/waal70)
+
+Please contact me if you need a commercial license for any of these files
