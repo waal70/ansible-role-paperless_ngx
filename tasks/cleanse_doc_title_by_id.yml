@@ -12,6 +12,10 @@
   ansible.builtin.debug:
     var: document_info_response.json
 
+- name: "Set cut counter default 0"
+  ansible.builtin.set_fact:
+    cut_counter: 0
+
 - name: "Set cut-counter for old archive files"
   ansible.builtin.set_fact:
     cut_counter: 11
@@ -26,11 +30,6 @@
   ansible.builtin.set_fact:
     cut_counter: 5
   when: document_info_response.json.title[4] | default('x') == '_'
-
-- name: "Set cut counter otherwise"
-  ansible.builtin.set_fact:
-    cut_counter: 0
-  when: cut_counter is not defined
 
 - name: "Update document title (cutting at {{ cut_counter }}) and set is_cleansed custom field to true for document with id {{ docid }}" # noqa: name[template]
   ansible.builtin.uri:
