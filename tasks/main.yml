@@ -21,6 +21,7 @@
     body_format: json
     body:
       "rotate_pages": true
+      "deskew": true
       "rotate_pages_threshold": 10
       "language": "nld"
       "output_type": "pdfa"
