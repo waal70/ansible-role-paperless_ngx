@@ -15,12 +15,12 @@
 - name: "Set cut-counter for old archive files"
   ansible.builtin.set_fact:
     cut_counter: 11
-  when: document_info_response.json.title[10] == '_'
+  when: document_info_response.json.title[10] | default('x') == '_'
 
 - name: "Set cut-counter for recently scanned"
   ansible.builtin.set_fact:
     cut_counter: 9
-  when: document_info_response.json.title[8] == '_'
+  when: document_info_response.json.title[8] | default('x') == '_'
 
 - name: "Set cut counter otherwise"
   ansible.builtin.set_fact:
