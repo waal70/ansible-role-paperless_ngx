@@ -70,3 +70,7 @@
 
 - name: "Include task to cleanse document titles"
   ansible.builtin.include_tasks: cleanse_doc_titles.yml
+
+- name: "Include tasks to EXPORT database, when ppl_export is true"
+  ansible.builtin.include_tasks: ppl_export.yml
+  when: ppl_export

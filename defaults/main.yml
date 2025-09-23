@@ -15,6 +15,9 @@ cifs_src: "//172.16.10.2/SCANS"
 # http://<address-of-paperless>:8010/api/schema/view/
 ppl_owner: 3
 
+# This controls the making of a database export
+ppl_export: false
+
 doc_types: [
   ["Type1", 6],
   ["Type2", 6]
@@ -41,6 +44,10 @@ storagepaths: [
 consumption_workflows: [
   ["CWF_1", "*/foldertomatch/*", "Type1", "Corr1", "SP1"],
   ["CWF_2", "*/anotherfolder/*", "Type2", "Corr1", "SP2"]
+]
+
+consumption_workflow_corr: [
+  ["CWC_1", "*filename*match*", "Corr1"]
 ]
 
 tagging_workflows: [

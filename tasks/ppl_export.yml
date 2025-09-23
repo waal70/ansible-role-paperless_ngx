@@ -1,0 +1,13 @@
+---
+- name: Run the command that will export the paperless database
+  community.docker.docker_compose_v2_exec:
+    service: webserver
+    command: document_exporter -p -f -nt ../export
+    docker_host: unix:///run/docker.sock
+    project_src: /opt/portainer/compose/6
+    privileged: true
+  register: ce_result
+
+- name: "Debug the result"
+  ansible.builtin.debug:
+    var: ce_result.stdout

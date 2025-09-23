@@ -1,7 +1,7 @@
 ---
 - name: "Populate a variable with all currently known document types"
   ansible.builtin.uri:
-    url: "{{ ppl_endpoint }}document_types/"
+    url: "{{ ppl_endpoint }}document_types/?page_size=100"
     method: GET
     validate_certs: false
     headers:

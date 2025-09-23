@@ -12,9 +12,13 @@
   ansible.builtin.debug:
     var: docs_to_cleanse_response.json.all
 
+# Limit the amount of documents to cleanse by setting loop.index0
 - name: "Include task to cleanse document titles"
   ansible.builtin.include_tasks: cleanse_doc_title_by_id.yml
   vars:
     docid: "{{ item }}"
-  with_items:
-    - "{{ docs_to_cleanse_response.json.all }}"
+  loop: "{{ docs_to_cleanse_response.json.all }}"
+  loop_control:
+    extended: true
+    break_when:
+      - ansible_loop.index0 == 99

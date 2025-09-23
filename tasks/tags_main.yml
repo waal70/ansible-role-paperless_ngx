@@ -1,7 +1,7 @@
 ---
 - name: "Populate a variable with all currently known tags"
   ansible.builtin.uri:
-    url: "{{ ppl_endpoint }}tags/"
+    url: "{{ ppl_endpoint }}tags/?page_size=100"
     method: GET
     validate_certs: false
     headers:

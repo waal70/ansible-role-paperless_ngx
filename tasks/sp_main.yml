@@ -1,7 +1,7 @@
 ---
 - name: "Populate a variable with all currently known Storage Paths"
   ansible.builtin.uri:
-    url: "{{ ppl_endpoint }}storage_paths/"
+    url: "{{ ppl_endpoint }}storage_paths/?page_size=100"
     method: GET
     validate_certs: false
     headers:

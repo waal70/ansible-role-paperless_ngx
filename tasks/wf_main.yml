@@ -8,7 +8,7 @@
 
 - name: "Populate a variable with all currently known Workflows"
   ansible.builtin.uri:
-    url: "{{ ppl_endpoint }}workflows/"
+    url: "{{ ppl_endpoint }}workflows/?page_size=100"
     method: GET
     validate_certs: false
     headers:
@@ -23,7 +23,7 @@
   block:
     - name: Retrieve document type
       ansible.builtin.uri:
-        url: "{{ ppl_endpoint }}document_types/"
+        url: "{{ ppl_endpoint }}document_types/?page_size=100"
         method: GET
         validate_certs: false
         headers:
@@ -32,7 +32,7 @@
 
     - name: Retrieve storage paths
       ansible.builtin.uri:
-        url: "{{ ppl_endpoint }}storage_paths/"
+        url: "{{ ppl_endpoint }}storage_paths/?page_size=100"
         method: GET
         validate_certs: false
         headers:
@@ -41,7 +41,7 @@
 
     - name: Retrieve correspondents
       ansible.builtin.uri:
-        url: "{{ ppl_endpoint }}correspondents/"
+        url: "{{ ppl_endpoint }}correspondents/?page_size=100"
         method: GET
         validate_certs: false
         headers:
@@ -50,7 +50,7 @@
 
     - name: Retrieve tags
       ansible.builtin.uri:
-        url: "{{ ppl_endpoint }}tags/"
+        url: "{{ ppl_endpoint }}tags/?page_size=100"
         method: GET
         validate_certs: false
         headers:
@@ -69,6 +69,16 @@
     wf_triggertype: 1
   with_items:
     - "{{ consumption_workflows }}"
+
+- name: "Create consumption-correspondent workflows"
+  ansible.builtin.include_tasks: wf_cc.yml
+  vars:
+    wf_name: "{{ item[0] }}"
+    wf_filter: "{{ item[1] }}"
+    wf_correspondent: "{{ item[2] }}"
+    wf_triggertype: 1
+  with_items:
+    - "{{ consumption_workflow_corr }}"
 
 - name: "Create addition workflows"
   ansible.builtin.include_tasks: wf_a.yml
