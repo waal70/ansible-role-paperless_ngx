@@ -22,6 +22,11 @@
     cut_counter: 9
   when: document_info_response.json.title[8] | default('x') == '_'
 
+- name: "Set cut-counter for only having year in title"
+  ansible.builtin.set_fact:
+    cut_counter: 5
+  when: document_info_response.json.title[4] | default('x') == '_'
+
 - name: "Set cut counter otherwise"
   ansible.builtin.set_fact:
     cut_counter: 0
