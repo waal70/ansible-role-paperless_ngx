@@ -1,0 +1,80 @@
+---
+- name: "Getting a list of all currently configured e-mail accounts"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}mail_accounts/"
+    method: GET
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+  register: mail_response
+
+- name: "Creating e-mail account {{ mail_name }}"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}mail_accounts/"
+    method: POST
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body:
+      "name": "{{ mail_name }}"
+      "imap_server": "{{ mail_imap }}"
+      "imap_port": "{{ mail_imap_port }}"
+      "imap_security": 2
+      "username": "{{ mail_username }}"
+      "password": "{{ mail_token }}"
+      "character_set": "UTF-8"
+      "is_token": false
+      "owner": "{{ ppl_owner }}"
+    status_code:
+      - 201
+  when: "(mail_name not in mail_response.json.results | map(attribute='name') | list)"
+
+- name: "Re-read a list of all currently configured e-mail accounts to get id"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}mail_accounts/"
+    method: GET
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+  register: mail_response
+
+- name: "Read tags in order to assign id of tag"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}tags/?page_size=100"
+    method: GET
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+  register: mailtag_response
+
+- name: "Populate the JMESPath query strings"
+  block:
+    - name: "Populate tag for E-mail"
+      ansible.builtin.set_fact:
+        tag_id: "results[?name==`E-mail`].id"
+### END BLOCK
+
+- name: "Creating e-mail rule Process e-mail"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}mail_rules/"
+    method: POST
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body:
+      "name": "Process e-mail"
+      "folder": "INBOX"
+      "account": "{{ mail_response.json.results[0].id }}"
+      "maximum_age": 10950
+      "action": 2
+      "action_parameter": "Verwerkt"
+      "assign_title_from": 1
+      "assign_tags": "{{ mailtag_response.json | community.general.json_query(tag_id) }}"
+      "attachment_type": 1
+      "consumption_scope": 1
+      "pdf_layout": 0
+      "owner": "{{ ppl_owner }}"
+    status_code:
+      - 201

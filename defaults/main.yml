@@ -3,6 +3,14 @@
 auth_token: "auth_token_in_vaulted vars"
 # If you run this on the host where paperless-ngx is running, this should be localhost
 ppl_endpoint: http://localhost:8010/api/
+
+mail_token: "tokengoeshere"
+mail_imap: "imap.gmail.com"
+mail_imap_port: 993
+# If you don't put an @-symbol here, the playbook will skip e-mail config
+mail_username: "emailadress"
+mail_name: "name for the account"
+
 delete_all_doc_types: false
 cleansetag: "is_cleansed"
 

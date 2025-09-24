@@ -63,6 +63,10 @@
 - name: "Include tasks to handle tags"
   ansible.builtin.include_tasks: tags_main.yml
 
+- name: "Include tasks to handle e-mail settings"
+  ansible.builtin.include_tasks: mail.yml
+  when: "'@' in mail_username"
+
 - name: "Include tasks to create Storage Paths"
   ansible.builtin.include_tasks: sp_main.yml
 
