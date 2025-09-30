@@ -2,7 +2,8 @@
 # defaults file for waal70.paperless-ngx
 auth_token: "auth_token_in_vaulted vars"
 # If you run this on the host where paperless-ngx is running, this should be localhost
-ppl_endpoint: http://localhost:8010/api/
+ppl_base: "http://localhost:8010"
+ppl_endpoint: "{{ ppl_base }}/api/"
 
 mail_token: "tokengoeshere"
 mail_imap: "imap.gmail.com"
@@ -14,14 +15,19 @@ mail_name: "name for the account"
 delete_all_doc_types: false
 cleansetag: "is_cleansed"
 
-# Please make sure to put the correct credentials in /media/.creds
-cifs_path: "/media/SCANS"
-cifs_src: "//172.16.10.2/SCANS"
+# Please make sure to put the correct credentials in /media/.<type>creds
+cifs_consume_path: "/mountpointhere"
+cifs_consume_src: "//server/shareconsume"
+cifs_export_path: "/mountpointexport"
+cifs_export_src: "//server/shareexport"
 
 # This is the user that will own all the config, so it should be properly authorized!
 # You can find the ID by GET'ing the /api/users, which can be easily done through:
 # http://<address-of-paperless>:8010/api/schema/view/
 ppl_owner: 3
+
+ppl_user: "ppl"
+ppl_password: "ppl"
 
 # This controls the making of a database export
 ppl_export: false

@@ -3,13 +3,126 @@
   ansible.builtin.include_vars:
     file: ../home/ansible-vault/paperless-vars.yml
 
-- name: "Ensure fstab contains CIFS for consume folder"
-  ansible.posix.mount:
-    path: "{{ cifs_path }}"
-    src: "{{ cifs_src }}"
-    fstype: cifs
-    opts: "uid=0,credentials=/media/.creds,iocharset=utf8,vers=3.0,noperm,x-systemd.automount,x-systemd.idle-timeout=30,x-systemd.mount-timeout=10"
-    state: mounted
+- name: "Block for consumption mapping"
+  when: cifs_consume_path is defined and cifs_consume_src is defined
+  block:
+    - name: "Ensure credentials files exist"
+      ansible.builtin.copy:
+        src: "{{ lookup('ansible.builtin.env', 'PRIVATE_REPO', default='~') }}/ansible-vault/.consumecreds"
+        dest: /media/.consumecreds
+        owner: root
+        group: root
+        mode: '0600'
+        remote_src: false
+        force: true
+    - name: "Ensure consume path exists"
+      ansible.builtin.file:
+        path: "{{ cifs_consume_path }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+    - name: "Ensure fstab contains CIFS for consume folder"
+      ansible.posix.mount:
+        path: "{{ cifs_consume_path }}"
+        src: "{{ cifs_consume_src }}"
+        fstype: cifs
+        opts: "uid=0,credentials=/media/.consumecreds,iocharset=utf8,vers=3.0,noperm,x-systemd.automount,x-systemd.idle-timeout=30,x-systemd.mount-timeout=10"
+        state: mounted
+# END Block for consumption mapping
+
+- name: "Block for export mapping"
+  when: cifs_export_path is defined and cifs_export_src is defined
+  block:
+    - name: "Ensure credentials files exist"
+      ansible.builtin.copy:
+        src: "{{ lookup('ansible.builtin.env', 'PRIVATE_REPO', default='~') }}/ansible-vault/.exportcreds"
+        dest: /media/.exportcreds
+        owner: root
+        group: root
+        mode: '0600'
+        remote_src: false
+        force: true
+    - name: "Ensure export path exists"
+      ansible.builtin.file:
+        path: "{{ cifs_export_path }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+    - name: "Ensure fstab contains CIFS for export folder"
+      ansible.posix.mount:
+        path: "{{ cifs_export_path }}"
+        src: "{{ cifs_export_src }}"
+        fstype: cifs
+        opts: "uid=0,credentials=/media/.exportcreds,iocharset=utf8,vers=3.0,noperm,x-systemd.automount,x-systemd.idle-timeout=30,x-systemd.mount-timeout=10"
+        state: mounted
+# END Block for export mapping
+
+- name: "Debug roles path"
+  ansible.builtin.debug:
+    msg: "Roles path is {{ role_path }}"
+
+- name: "Template the paperless.yml file to the role's files/ directory"
+  ansible.builtin.template:
+    src: paperless.yml.j2
+    dest: "{{ role_path }}/files/paperless.yml"
+    owner: "{{ interactive_user }}"
+    group: "{{ interactive_user }}"
+    mode: '0644'
+    force: true
+  delegate_to: localhost
+
+- name: "Include role to deploy paperless-ngx-stack to Portainer"
+  ansible.builtin.include_role:
+    name: waal70.portainer
+  vars:
+    stack_list:
+      - name: paperless
+        file: paperless.yml # file is in files/ of this role
+
+- name: "Wait for stack to be fully started by querying the /schema/view/ endpoint"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}/schema/view/"
+    method: GET
+    validate_certs: false
+  register: wait_ppl_result
+  until: wait_ppl_result is succeeded
+  retries: 10
+  delay: 6
+  changed_when: false
+
+- name: "Return the paperless yaml back to its placeholder version"
+  ansible.builtin.copy:
+    src: paperless.yml.placeholder
+    dest: "{{ role_path }}/files/paperless.yml"
+    owner: "{{ interactive_user }}"
+    group: "{{ interactive_user }}"
+    mode: '0644'
+    remote_src: false
+    force: true
+  delegate_to: localhost
+
+- name: "Generate authentication token for user ID {{ ppl_owner }} on {{ ppl_endpoint }}" # noqa: name[template]
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}token/"
+    method: POST
+    return_content: true
+    body_format: json
+    body:
+      "username": "{{ ppl_user }}"
+      "password": "{{ ppl_password }}"
+    validate_certs: false
+  register: auth_response
+  until: auth_response.status == 200
+  retries: 5
+  delay: 3
+  changed_when: false # prevent Ansible from thinking this task changed something
+
+- name: "Set auth_token fact"
+  ansible.builtin.set_fact:
+    auth_token: "{{ auth_response.json.token }}"
+  changed_when: false # prevent Ansible from thinking this task changed something
 
 - name: "Set some config on {{ ppl_endpoint }}"
   ansible.builtin.uri:
