@@ -8,6 +8,15 @@
     validate_certs: false
   register: mail_response
 
+- name: "Getting a list of all currently configured e-mail rules"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}mail_rules/"
+    method: GET
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+  register: mailrules_response
+
 - name: "Creating e-mail account {{ mail_name }}"
   ansible.builtin.uri:
     url: "{{ ppl_endpoint }}mail_accounts/"
@@ -78,3 +87,4 @@
       "owner": "{{ ppl_owner }}"
     status_code:
       - 201
+  when: "( 'Process e-mail' not in mailrules_response.json.results | map(attribute='name') | list )"

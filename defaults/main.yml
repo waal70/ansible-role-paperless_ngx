@@ -29,6 +29,8 @@ ppl_owner: 3
 ppl_user: "ppl"
 ppl_password: "ppl"
 
+ppl_domain: "yourdomain.here" # without http(s):// and without a trailing slash
+
 # This controls the making of a database export
 ppl_export: false
 

@@ -8,7 +8,7 @@ services:
       - ./redisdata:/data
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
-    restart: unless-stopped
+    restart: on-failure
     depends_on:
       - broker
     ports:
@@ -21,6 +21,7 @@ services:
     environment:
       PAPERLESS_ADMIN_USER: "{{ ppl_user }}"
       PAPERLESS_ADMIN_PASSWORD: "{{ ppl_password }}"
+      PAPERLESS_CSRF_TRUSTED_ORIGINS: https://{{ ppl_domain }}, http://{{ ppl_domain }}
       PAPERLESS_REDIS: redis://broker:6379
       PAPERLESS_OCR_LANGUAGE: nld
       PAPERLESS_OCR_LANGUAGES: nld eng
@@ -42,6 +43,7 @@ services:
       PAPERLESS_TASK_WORKERS: 2
       PAPERLESS_THREADS_PER_WORKER: 2
     networks:
+      - default
       - paperless_network
     volumes:
       - ./data:/usr/src/paperless/data
@@ -50,4 +52,8 @@ services:
       - {{ cifs_consume_path }}:/usr/src/paperless/consume
 
 networks:
+  default:
+    external: true
+    name: reverse-proxy
   paperless_network:
+    name: paperless
