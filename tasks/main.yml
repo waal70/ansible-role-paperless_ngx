@@ -19,8 +19,8 @@
       ansible.builtin.file:
         path: "{{ cifs_consume_path }}"
         state: directory
-        owner: root
-        group: root
+        owner: "{{ interactive_user }}"
+        group: "{{ interactive_user }}"
         mode: '0755'
     - name: "Ensure fstab contains CIFS for consume folder"
       ansible.posix.mount:
@@ -47,15 +47,15 @@
       ansible.builtin.file:
         path: "{{ cifs_export_path }}"
         state: directory
-        owner: root
-        group: root
+        owner: "{{ interactive_user }}"
+        group: "{{ interactive_user }}"
         mode: '0755'
     - name: "Ensure fstab contains CIFS for export folder"
       ansible.posix.mount:
         path: "{{ cifs_export_path }}"
         src: "{{ cifs_export_src }}"
         fstype: cifs
-        opts: "uid=0,credentials=/media/.exportcreds,iocharset=utf8,vers=3.0,noperm,x-systemd.automount,x-systemd.idle-timeout=30,x-systemd.mount-timeout=10"
+        opts: "uid=1000,credentials=/media/.exportcreds,iocharset=utf8,vers=3.0,noperm,x-systemd.automount,x-systemd.idle-timeout=30,x-systemd.mount-timeout=10"
         state: mounted
 # END Block for export mapping
 

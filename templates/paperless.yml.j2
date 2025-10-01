@@ -8,9 +8,12 @@ services:
       - ./redisdata:/data
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: ppl-web
     restart: on-failure
     depends_on:
-      - broker
+      broker:
+        condition: service_started
+        restart: true
     ports:
       - 8010:8000
     healthcheck:
@@ -18,9 +21,11 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 60s
     environment:
       PAPERLESS_ADMIN_USER: "{{ ppl_user }}"
       PAPERLESS_ADMIN_PASSWORD: "{{ ppl_password }}"
+      PAPERLESS_URL: https://{{ ppl_domain }}
       PAPERLESS_CSRF_TRUSTED_ORIGINS: https://{{ ppl_domain }}, http://{{ ppl_domain }}
       PAPERLESS_REDIS: redis://broker:6379
       PAPERLESS_OCR_LANGUAGE: nld
