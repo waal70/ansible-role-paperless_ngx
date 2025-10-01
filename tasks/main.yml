@@ -55,7 +55,7 @@
         path: "{{ cifs_export_path }}"
         src: "{{ cifs_export_src }}"
         fstype: cifs
-        opts: "uid=1000,credentials=/media/.exportcreds,iocharset=utf8,vers=3.0,noperm,x-systemd.automount,x-systemd.idle-timeout=30,x-systemd.mount-timeout=10"
+        opts: "uid=0,credentials=/media/.consumecreds,iocharset=utf8,vers=3.0,noperm,x-systemd.automount,x-systemd.idle-timeout=30,x-systemd.mount-timeout=10"
         state: mounted
 # END Block for export mapping
 
