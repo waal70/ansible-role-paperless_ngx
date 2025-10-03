@@ -1,13 +1,29 @@
 ---
+- name: "Set fact for user to run docker exec under"
+  ansible.builtin.set_fact:
+    docker_exec_user: "{{ ansible_env.SUDO_USER | default(ansible_env.USER, true) | default(ansible_user_id, true) }}"
+
 - name: Run the command that will export the paperless database
-  community.docker.docker_compose_v2_exec:
-    service: webserver
-    command: document_exporter -p -f -nt ../export
+  community.docker.docker_container_exec:
+    container: ppl-web
+    command: "{{ ppl_export_cmd }}"
     docker_host: unix:///run/docker.sock
-    project_src: /opt/portainer/compose/6
-    privileged: true
-  register: ce_result
+    user: "{{ docker_exec_user }} "
+  register: export_result
+  when: ppl_export | bool
 
 - name: "Debug the result"
   ansible.builtin.debug:
-    var: ce_result.stdout
+    var: export_result.stdout
+  when: ppl_export | bool
+
+- name: "Schedule a regular export in cron"
+  ansible.builtin.cron:
+    name: "paperless-ngx export"
+    weekday: "6"
+    minute: "0"
+    hour: "5"
+    user: "{{ docker_exec_user }}"
+    job: "/usr/bin/docker exec -it ppl-web {{ ppl_export_cmd }} >/dev/null 2>&1"
+    state: "present"
+  when: ppl_export_schedule | bool

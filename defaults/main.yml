@@ -14,6 +14,8 @@ mail_name: "name for the account"
 
 delete_all_doc_types: false
 cleansetag: "is_cleansed"
+# Switch to false to enable the cleansing of titles based on the rules in cleanse_doc_titles.yml
+cleanse_titles: true
 
 # Please make sure to put the correct credentials in /media/.<type>creds
 cifs_consume_path: "/mountpointhere"
@@ -21,18 +23,21 @@ cifs_consume_src: "//server/shareconsume"
 cifs_export_path: "/mountpointexport"
 cifs_export_src: "//server/shareexport"
 
-# This is the user that will own all the config, so it should be properly authorized!
-# You can find the ID by GET'ing the /api/users, which can be easily done through:
-# http://<address-of-paperless>:8010/api/schema/view/
-ppl_owner: 3
-
 ppl_user: "ppl"
 ppl_password: "ppl"
-
-ppl_domain: "yourdomain.here" # without http(s):// and without a trailing slash
-
+# This controls rolling out the config
+ppl_do_config: true
 # This controls the making of a database export
 ppl_export: false
+# This controls whether to make the cron job for the export
+ppl_export_schedule: true
+# The command to export. Please note that import can be done on an empty ppl instance
+# You can then use: docker exec -it ppl-web document_importer ../export
+# Should you not have exported thumbnails (-nt), you can regenerate them through:
+# docker exec -it ppl-web document_thumbnails
+ppl_export_cmd: "document_exporter -p -f -nt -d ../export"
+
+ppl_domain: "yourdomain.here" # without http(s):// and without a trailing slash
 
 doc_types: [
   ["Type1", 6],

@@ -1,7 +1,15 @@
 ---
+# This include_vars allows you to keep your vaulted variables outside of your main repo
+# It assumes the PRIVATE_REPO environment variable is set to the path of your private repo
+# On home-infra, this is done by firstrun.sh.
+# However, this role will not break if you do not have these
 - name: Include vaulted password file
   ansible.builtin.include_vars:
-    file: ../home/ansible-vault/paperless-vars.yml
+    file: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ lookup('env', 'PRIVATE_REPO') | default('~') }}/ansible-vault/{{ ansible_role_name }}-vars.yml"
+      skip: true
 
 - name: "Block for consumption mapping"
   when: cifs_consume_path is defined and cifs_consume_src is defined
@@ -103,7 +111,7 @@
     force: true
   delegate_to: localhost
 
-- name: "Generate authentication token for user ID {{ ppl_owner }} on {{ ppl_endpoint }}" # noqa: name[template]
+- name: "Generate authentication token for user ID {{ ppl_user }} on {{ ppl_endpoint }}" # noqa: name[template]
   ansible.builtin.uri:
     url: "{{ ppl_endpoint }}token/"
     method: POST
@@ -124,6 +132,29 @@
     auth_token: "{{ auth_response.json.token }}"
   changed_when: false # prevent Ansible from thinking this task changed something
 
+# This is the user that will own all the config, so it should be properly authorized!
+# You can find the ID by GET'ing the /api/users, which can be easily done through:
+# http://<address-of-paperless>:8010/api/schema/view/
+# ppl_owner: 3
+# users/?username__iexact=ppl'
+
+- name: "Setting ppl_owner - query the user ID for user {{ ppl_user }}" # noqa: name[template]
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}users/?username={{ ppl_user }}"
+    method: GET
+    validate_certs: false
+    headers:
+      Authorization: "Token {{ auth_token }}"
+  register: ppl_user_response
+  until: ppl_user_response.status == 200
+  retries: 5
+  delay: 3
+  changed_when: false # prevent Ansible from thinking this task changed something
+
+- name: "Set ppl_owner fact"
+  ansible.builtin.set_fact:
+    ppl_owner: "{{ ppl_user_response.json.results[0].id }}"
+
 - name: "Set some config on {{ ppl_endpoint }}"
   ansible.builtin.uri:
     url: "{{ ppl_endpoint }}config/1/"
@@ -143,52 +174,36 @@
       "unpaper_clean": "clean"
       "color_conversion_strategy": "LeaveColorUnchanged"
 
-- name: "Get existing custom fields"
-  ansible.builtin.uri:
-    url: "{{ ppl_endpoint }}custom_fields/"
-    method: GET
-    headers:
-      Authorization: "Token {{ auth_token }}"
-    validate_certs: false
-  register: cf_response
+- name: "Block to do configuration. Do not perform this when restoring from export."
+  when: ppl_do_config
+  block:
+    - name: "Include tasks to create custom fields"
+      ansible.builtin.include_tasks: cf_main.yml
 
-- name: "Create custom field for cleansing later on"
-  ansible.builtin.uri:
-    url: "{{ ppl_endpoint }}custom_fields/"
-    method: POST
-    headers:
-      Authorization: "Token {{ auth_token }}"
-    validate_certs: false
-    body_format: json
-    body:
-      "name": "{{ cleansetag }}"
-      "data_type": "boolean"
-    status_code:
-      - 201
-  when: "(cleansetag not in cf_response.json.results | map(attribute='name') | list)"
+    - name: "Include tasks to handle document types"
+      ansible.builtin.include_tasks: doc_type_main.yml
 
-- name: "Include tasks to handle document types"
-  ansible.builtin.include_tasks: doc_type_main.yml
+    - name: "Include tasks to handle correspondents"
+      ansible.builtin.include_tasks: correspondent_main.yml
 
-- name: "Include tasks to handle correspondents"
-  ansible.builtin.include_tasks: correspondent_main.yml
+    - name: "Include tasks to handle tags"
+      ansible.builtin.include_tasks: tags_main.yml
 
-- name: "Include tasks to handle tags"
-  ansible.builtin.include_tasks: tags_main.yml
+    - name: "Include tasks to handle e-mail settings"
+      ansible.builtin.include_tasks: mail.yml
+      when: "'@' in mail_username"
 
-- name: "Include tasks to handle e-mail settings"
-  ansible.builtin.include_tasks: mail.yml
-  when: "'@' in mail_username"
+    - name: "Include tasks to create Storage Paths"
+      ansible.builtin.include_tasks: sp_main.yml
 
-- name: "Include tasks to create Storage Paths"
-  ansible.builtin.include_tasks: sp_main.yml
+    - name: "Include tasks to create workflows"
+      ansible.builtin.include_tasks: wf_main.yml
 
-- name: "Include tasks to create workflows"
-  ansible.builtin.include_tasks: wf_main.yml
+    - name: "Include task to cleanse document titles"
+      ansible.builtin.include_tasks: cleanse_doc_titles.yml
+      when: cleanse_titles | bool
+# END Block to do configuration
 
-- name: "Include task to cleanse document titles"
-  ansible.builtin.include_tasks: cleanse_doc_titles.yml
-
-- name: "Include tasks to EXPORT database, when ppl_export is true"
+- name: "Include tasks to EXPORT and/or CRON schedule the export of database"
   ansible.builtin.include_tasks: ppl_export.yml
-  when: ppl_export
+  when: (ppl_export | bool) or (ppl_export_schedule | bool)

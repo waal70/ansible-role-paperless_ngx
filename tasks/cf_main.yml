@@ -1,0 +1,24 @@
+---
+- name: "Get existing custom fields"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}custom_fields/"
+    method: GET
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+  register: cf_response
+
+- name: "Create custom field for cleansing later on"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}custom_fields/"
+    method: POST
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body:
+      "name": "{{ cleansetag }}"
+      "data_type": "boolean"
+    status_code:
+      - 201
+  when: "(cleansetag not in cf_response.json.results | map(attribute='name') | list)"
