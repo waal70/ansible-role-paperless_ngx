@@ -82,6 +82,7 @@
       "assign_title_from": 1
       "assign_tags": "{{ mailtag_response.json | community.general.json_query(tag_id) }}"
       "attachment_type": 2
+      "filter_attachment_filename_include": "*.pdf"
       "consumption_scope": 1
       "pdf_layout": 0
       "owner": "{{ ppl_owner }}"
