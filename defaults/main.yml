@@ -28,7 +28,7 @@ ppl_password: "ppl"
 # This controls rolling out the config
 ppl_do_config: true
 # This controls the making of a database export
-ppl_export: false
+ppl_export: true
 # This controls whether to make the cron job for the export
 ppl_export_schedule: true
 # The command to export. Please note that import can be done on an empty ppl instance

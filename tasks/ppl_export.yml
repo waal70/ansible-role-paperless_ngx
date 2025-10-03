@@ -8,8 +8,9 @@
     container: ppl-web
     command: "{{ ppl_export_cmd }}"
     docker_host: unix:///run/docker.sock
-    user: "{{ docker_exec_user }} "
   register: export_result
+  become: true
+  become_user: "{{ docker_exec_user }}"
   when: ppl_export | bool
 
 - name: "Debug the result"
