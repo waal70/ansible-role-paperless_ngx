@@ -81,7 +81,7 @@
       "action_parameter": "Verwerkt"
       "assign_title_from": 1
       "assign_tags": "{{ mailtag_response.json | community.general.json_query(tag_id) }}"
-      "attachment_type": 1
+      "attachment_type": 2
       "consumption_scope": 1
       "pdf_layout": 0
       "owner": "{{ ppl_owner }}"
