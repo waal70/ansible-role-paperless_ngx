@@ -22,12 +22,12 @@
       when: wf_sp != ''
 ### END BLOCK
 
-- name: "Debug the combination of ids to set for workflow {{ wf_name }}"
-  ansible.builtin.debug:
-    msg:
-      - "Document type for {{ wf_doctype }} is {{ doc_types_response.json | community.general.json_query(q_doctype_id) | first | default('') }}"
-      - "Storage path type for {{ wf_sp }} is {{ sp_response.json | community.general.json_query(q_sp_id) | first | default('') }}"
-      - "Correspondents type for {{ wf_correspondent }} is {{ correspondents_response.json | community.general.json_query(q_correspondent_id) | first | default('') }}" # noqa: yaml[line-length]
+# - name: "Debug the combination of ids to set for workflow {{ wf_name }}"
+#   ansible.builtin.debug:
+#     msg:
+#       - "Document type for {{ wf_doctype }} is {{ doc_types_response.json | community.general.json_query(q_doctype_id) | first | default('') }}"
+#       - "Storage path type for {{ wf_sp }} is {{ sp_response.json | community.general.json_query(q_sp_id) | first | default('') }}"
+#       - "Correspondents type for {{ wf_correspondent }} is {{ correspondents_response.json | community.general.json_query(q_correspondent_id) | first | default('') }}" # noqa: yaml[line-length]
 
 - name: "Creating workflow {{ wf_name }}"
   ansible.builtin.uri:

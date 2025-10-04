@@ -8,10 +8,6 @@
       Authorization: "Token {{ auth_token }}"
   register: document_info_response
 
-- name: "Debug document info response"
-  ansible.builtin.debug:
-    var: document_info_response.json
-
 - name: "Set cut counter default 0"
   ansible.builtin.set_fact:
     cut_counter: 0

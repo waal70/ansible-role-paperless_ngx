@@ -67,10 +67,6 @@
         state: mounted
 # END Block for export mapping
 
-- name: "Debug roles path"
-  ansible.builtin.debug:
-    msg: "Roles path is {{ role_path }}"
-
 - name: "Template the paperless.yml file to the role's files/ directory"
   ansible.builtin.template:
     src: paperless.yml.j2
