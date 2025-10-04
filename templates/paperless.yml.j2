@@ -25,6 +25,7 @@ services:
     environment:
       PAPERLESS_ADMIN_USER: "{{ ppl_user }}"
       PAPERLESS_ADMIN_PASSWORD: "{{ ppl_password }}"
+      PAPERLESS_DB_TIMEOUT: 30
       PAPERLESS_URL: https://{{ ppl_domain }}
       PAPERLESS_CSRF_TRUSTED_ORIGINS: https://{{ ppl_domain }}, http://{{ ppl_domain }}
       PAPERLESS_REDIS: redis://broker:6379
