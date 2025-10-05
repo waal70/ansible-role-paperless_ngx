@@ -12,11 +12,6 @@
       when: wf_assigntag != ''
 ### END BLOCK
 
-- name: "Debug the combination of ids to set for workflow {{ wf_name }}"
-  ansible.builtin.debug:
-    msg:
-      - "Tag type for {{ wf_assigntag }} is {{ tags_response.json | community.general.json_query(q_tag_id) | first | default('') }}"
-
 - name: "Creating workflow {{ wf_name }}"
   ansible.builtin.uri:
     url: "{{ ppl_endpoint }}workflows/"

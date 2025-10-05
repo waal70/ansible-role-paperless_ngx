@@ -12,11 +12,6 @@
       when: wf_correspondent != ''
 ### END BLOCK
 
-- name: "Debug the combination of ids to set for workflow {{ wf_name }}"
-  ansible.builtin.debug:
-    msg:
-      - "Correspondents type for {{ wf_correspondent }} is {{ correspondents_response.json | community.general.json_query(q_correspondent_id) | first | default('') }}" # noqa: yaml[line-length]
-
 - name: "Creating workflow {{ wf_name }}"
   ansible.builtin.uri:
     url: "{{ ppl_endpoint }}workflows/"

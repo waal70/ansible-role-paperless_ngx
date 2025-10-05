@@ -13,11 +13,6 @@
   become_user: "{{ docker_exec_user }}"
   when: ppl_export | bool
 
-- name: "Debug the result"
-  ansible.builtin.debug:
-    var: export_result.stdout
-  when: ppl_export | bool
-
 - name: "Schedule a regular export in cron"
   ansible.builtin.cron:
     name: "paperless-ngx export"

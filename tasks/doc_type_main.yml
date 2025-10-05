@@ -8,10 +8,6 @@
       Authorization: "Token {{ auth_token }}"
   register: doc_types_response
 
-- name: "Debug document types"
-  ansible.builtin.debug:
-    var: doc_types_response.json.results | map(attribute='name') | list
-
 - name: "Delete all document types when this is specified"
   ansible.builtin.uri:
     url: "{{ ppl_endpoint }}document_types/{{ item }}/"

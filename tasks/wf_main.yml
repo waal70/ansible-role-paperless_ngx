@@ -15,10 +15,6 @@
       Authorization: "Token {{ auth_token }}"
   register: wf_response
 
-- name: "Debug workflow names"
-  ansible.builtin.debug:
-    var: wf_response.json.results | map(attribute='name') | list
-
 - name: "Retrieve primary keys for document_type, storage_path, correspondent, and tags"
   block:
     - name: Retrieve document type

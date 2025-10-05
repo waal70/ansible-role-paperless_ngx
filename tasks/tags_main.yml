@@ -8,10 +8,6 @@
       Authorization: "Token {{ auth_token }}"
   register: tags_response
 
-- name: "Debug tags"
-  ansible.builtin.debug:
-    var: tags_response.json.results | map(attribute='name') | list
-
 - name: "Create the INBOX tag, if it does not exist yet"
   ansible.builtin.uri:
     url: "{{ ppl_endpoint }}tags/"

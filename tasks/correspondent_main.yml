@@ -8,10 +8,6 @@
       Authorization: "Token {{ auth_token }}"
   register: correspondents_response
 
-- name: "Debug correspondents"
-  ansible.builtin.debug:
-    var: correspondents_response.json.results | map(attribute='name') | list
-
 - name: "Create correspondents"
   ansible.builtin.include_tasks: correspondent.yml
   vars:
