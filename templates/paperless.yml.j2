@@ -5,7 +5,7 @@ services:
       - paperless_network
     restart: unless-stopped
     volumes:
-      - ./redisdata:/data
+      - /appdata/redisdata:/data
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
     container_name: ppl-web
@@ -52,8 +52,8 @@ services:
       - default
       - paperless_network
     volumes:
-      - ./data:/usr/src/paperless/data
-      - ./media:/usr/src/paperless/media
+      - /data/ppl:/usr/src/paperless/data
+      - /media/ppl:/usr/src/paperless/media
       - {{ cifs_export_path }}:/usr/src/paperless/export
       - {{ cifs_consume_path }}:/usr/src/paperless/consume
 
