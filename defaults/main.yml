@@ -25,6 +25,7 @@ cifs_export_src: "//server/shareexport"
 
 ppl_user: "ppl"
 ppl_password: "ppl"
+ppl_dbpassword: "paperlessdb"
 # This controls rolling out the config
 ppl_do_config: true
 # This controls the making of a database export

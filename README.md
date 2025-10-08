@@ -19,6 +19,19 @@ This role configures all aspects of the paperless container
 
 Work in progress!
 
+Commands used to export the documents:
+
+```bash
+document_exporter ../export -f -nt -d -p
+```
+
+Command to import:
+
+```bash
+document_importer ../export
+document_thumbnails
+```
+
 ## Requirements
 
 - `cifs-utils`
