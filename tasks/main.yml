@@ -92,8 +92,8 @@
     validate_certs: false
   register: wait_ppl_result
   until: wait_ppl_result is succeeded
-  retries: 10
-  delay: 6
+  retries: 15
+  delay: 10
   changed_when: false
 
 - name: "Return the paperless yaml back to its placeholder version"
@@ -202,4 +202,6 @@
 
 - name: "Include tasks to EXPORT and/or CRON schedule the export of database"
   ansible.builtin.include_tasks: ppl_export.yml
-  when: (ppl_export | bool) or (ppl_export_schedule | bool)
+  when:
+    - (ppl_export | bool) or (ppl_export_schedule | bool)
+    - "'test' not in group_names"
