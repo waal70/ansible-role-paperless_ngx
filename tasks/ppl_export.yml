@@ -20,6 +20,6 @@
     minute: "0"
     hour: "5"
     user: "{{ docker_exec_user }}"
-    job: "/usr/bin/docker exec -it ppl-web {{ ppl_export_cmd }} >> /home/{{ docker_exec_user }}/crontab.log 2>&1"
+    job: "/usr/bin/docker exec -t ppl-web {{ ppl_export_cmd }} >> /home/{{ docker_exec_user }}/crontab.log 2>&1"
     state: "present"
   when: ppl_export_schedule | bool
