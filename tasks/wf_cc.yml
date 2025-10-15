@@ -3,6 +3,29 @@
     # wf_filter: "{{ item[1] }}"
     # wf_correspondent: "{{ item[2] }}"
     # wf_triggertype
+    # wf_filter could be a list, in which case the triggers part should be handled differently...
+
+- name: Initialize looper and triggersection variable
+  ansible.builtin.set_fact:
+    looper: []
+    triggersection: []
+
+- name: Convert wf_filter into a list if it is just a single string
+  ansible.builtin.set_fact:
+    looper: "{{ looper + [wf_filter] }}"
+  when: wf_filter is string
+
+- name: Add wf_filter to the looper variable if it was already a list
+  ansible.builtin.set_fact:
+    looper: "{{ wf_filter }}"
+  when: wf_filter is not string and wf_filter is not mapping and wf_filter is iterable
+
+- name: Prepare the JSON for the triggersection of the API-call
+  ansible.builtin.set_fact:
+    triggersection: "{{ triggersection +
+                      [{'type': wf_triggertype,
+                        'filter_filename': item}] }}"
+  loop: "{{ looper }}"
 
 - name: "Populate the JMESPath query strings"
   block:
@@ -23,12 +46,7 @@
     body: {
       "name": "{{ wf_name }}",
       "enabled": true,
-      "triggers": [
-        {
-          "type": "{{ wf_triggertype }}",
-          "filter_filename": "{{ wf_filter }}"
-        }
-      ],
+      "triggers": "{{ triggersection }}",
       "actions": [
         {
           "type": 1,
