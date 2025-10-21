@@ -1,0 +1,58 @@
+---
+#  vars:
+#     wf_name: "{{ item[0] }}"
+#     wf_triggertag: "{{ item[1] }}"
+#     wf_topic: "{{ item[2] }}"
+#     wf_message: "{{ item[3] }}"
+
+- name: "Populate the JMESPath query strings"
+  block:
+    - name: "Populate tag for {{ wf_triggertag }}"
+      ansible.builtin.set_fact:
+        q_tag_id: "results[?name==`{{ wf_triggertag }}`].id"
+      when: wf_triggertag != ''
+### END BLOCK
+
+- name: "Creating workflow {{ wf_name }}"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}workflows/"
+    method: POST
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body: {
+      "name": "{{ wf_name }}",
+      "enabled": true,
+      "triggers": [
+        {
+          "type": 3,
+          "filter_has_tags": [
+            "{{ tags_response.json | community.general.json_query(q_tag_id) | first | default('') }}"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": 4,
+          "webhook": {
+            "id": 1,
+            "url": "https://ntfy.sh/{{ wf_topic }}",
+            "use_params": false,
+            "as_json": false,
+            "params": {},
+            "body": "{{ wf_message }}",
+            "headers": null,
+            "include_document": false
+          }
+        }
+      ]
+    }
+    status_code:
+      - 201
+
+  when: "(wf_name not in wf_response.json.results | map(attribute='name') | list)"
+  register: _result
+  until: _result.status == 201
+  retries: 3
+  delay: 5

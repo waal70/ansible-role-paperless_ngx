@@ -76,3 +76,8 @@ tagging_workflows: [
   ["TWF_1", "*stringintitle*", "Tag1"],
   ["TWF_2", "*otherstring*", "Tag2"]
 ]
+
+notification_workflows: [
+  ["NWF_1", "triggertag", "<ntfytopichere>", "<notification_message"],
+  ["NWF_2", "triggertag", "<ntfytopichere>", "<notification_message"],
+]

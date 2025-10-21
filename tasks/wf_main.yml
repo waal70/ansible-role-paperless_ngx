@@ -8,7 +8,7 @@
 
 - name: "Populate a variable with all currently known Workflows"
   ansible.builtin.uri:
-    url: "{{ ppl_endpoint }}workflows/?page_size=100"
+    url: "{{ ppl_endpoint }}workflows/?page_size=150"
     method: GET
     validate_certs: false
     headers:
@@ -85,3 +85,13 @@
     wf_triggertype: 2
   with_items:
     - "{{ tagging_workflows }}"
+
+- name: "Create workflows towards ntfy.sh based on tags"
+  ansible.builtin.include_tasks: wf_notify.yml
+  vars:
+    wf_name: "{{ item[0] }}"
+    wf_triggertag: "{{ item[1] }}"
+    wf_topic: "{{ item[2] }}"
+    wf_message: "{{ item[3] }}"
+  with_items:
+    - "{{ notification_workflows }}"
