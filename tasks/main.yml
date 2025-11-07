@@ -18,13 +18,6 @@
       ansible.builtin.package:
         name: nfs-kernel-server
         state: present
-    - name: "Ensure user for NFS exists"
-      ansible.builtin.user:
-        name: "{{ ppl_user }}"
-        password: "{{ ppl_password }}"
-        state: present
-        create_home: false
-        system: true
     - name: "Ensure consume path exists"
       ansible.builtin.file:
         path: "{{ cifs_consume_path }}"
@@ -49,31 +42,33 @@
 # END Block for consumption mapping
 
 - name: "Block for export mapping"
-  when: cifs_export_path is defined and cifs_export_src is defined
+  when: cifs_export_path is defined
   block:
-    - name: "Ensure credentials files exist"
-      ansible.builtin.copy:
-        src: "{{ lookup('ansible.builtin.env', 'PRIVATE_REPO', default='~') }}/ansible-vault/.exportcreds"
-        dest: /media/.exportcreds
-        owner: root
-        group: root
-        mode: '0600'
-        remote_src: false
-        force: true
+    - name: "Ensure nfs package is installed"
+      ansible.builtin.package:
+        name: nfs-kernel-server
+        state: present
     - name: "Ensure export path exists"
       ansible.builtin.file:
         path: "{{ cifs_export_path }}"
         state: directory
-        owner: "{{ interactive_user }}"
-        group: "{{ interactive_user }}"
-        mode: '0755'
-    - name: "Ensure fstab contains CIFS for export folder"
-      ansible.posix.mount:
-        path: "{{ cifs_export_path }}"
-        src: "{{ cifs_export_src }}"
-        fstype: cifs
-        opts: "uid=0,credentials=/media/.consumecreds,iocharset=utf8,vers=3.0,noperm,x-systemd.automount,x-systemd.idle-timeout=30,x-systemd.mount-timeout=10"
-        state: mounted
+        owner: "nobody"
+        group: "nogroup"
+        mode: '0777'
+    - name: "Configure nfs-utils with correct exports"
+      ansible.builtin.lineinfile:
+        path: /etc/exports
+        line: "{{ cifs_export_path }} 172.16.10.2(rw,sync,no_subtree_check,no_root_squash)"
+        state: present
+        create: true
+        mode: '0644'
+    - name: "Enable and start NFS services"
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: true
+      loop:
+        - nfs-server
 # END Block for export mapping
 
 - name: "Template the paperless.yml file to the role's files/ directory"

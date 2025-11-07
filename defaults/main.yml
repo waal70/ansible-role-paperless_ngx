@@ -20,7 +20,6 @@ cleanse_titles: true
 # Please make sure to put the correct credentials in /media/.<type>creds
 cifs_consume_path: "/mountpointhere"
 cifs_export_path: "/mountpointexport"
-cifs_export_src: "//server/shareexport"
 
 ppl_user: "ppl"
 ppl_password: "ppl"
