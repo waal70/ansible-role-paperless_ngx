@@ -172,7 +172,7 @@
       "mode": "skip"
       "skip_archive_file": "never"
       "unpaper_clean": "clean"
-      "color_conversion_strategy": "LeaveColorUnchanged"
+      "color_conversion_strategy": "RGB"
 
 - name: "Block to do configuration. Do not perform this when restoring from export."
   when: ppl_do_config
