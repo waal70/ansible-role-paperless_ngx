@@ -9,8 +9,9 @@ services:
   db:
     image: docker.io/library/postgres:17
     restart: unless-stopped
+    # Andre fix December 2025. Let docker manage the volume for pgdata to prevent permission errors
     volumes:
-      - /data/ppl/pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: paperless
       POSTGRES_USER: paperless
@@ -59,6 +60,33 @@ services:
       PAPERLESS_CONSUMER_RECURSIVE: true
       PAPERLESS_TASK_WORKERS: 2
       PAPERLESS_THREADS_PER_WORKER: 2
+      {% if ppl_sso | default(false) | bool -%}
+      PAPERLESS_ENABLE_ALLAUTH: true
+      PAPERLESS_APPS: allauth.socialaccount.providers.openid_connect
+      PAPERLESS_SOCIALACCOUNT_PROVIDERS: >
+        {
+          "openid_connect": {
+            "APPS": [
+              {
+                "provider_id": "authentik",
+                "name": "SSO",
+                "client_id": "{{ ppl_sso_client_id }}",
+                "secret": "{{ ppl_sso_secret }}",
+                "settings": {
+                  "server_url": "{{ ppl_sso_base_url }}/.well-known/openid-configuration",
+                  "claims": {"username": "email"}
+                }
+              }
+            ],
+            "OAUTH_PKCE_ENABLED": "True"
+          }
+        }
+      PAPERLESS_AUTO_LOGIN: true
+      PAPERLESS_AUTO_CREATE: true
+      PAPERLESS_LOGOUT_REDIRECT_URL: "{{ ppl_sso_base_url }}/end-session/"
+      PAPERLESS_SOCIALACCOUNT_ALLOW_SIGNUPS: true
+      {%- endif %}
+
     networks:
       - default
       - paperless_network
@@ -73,3 +101,5 @@ networks:
     name: reverse-proxy
   paperless_network:
     name: paperless
+volumes:
+  pgdata:

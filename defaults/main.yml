@@ -12,6 +12,11 @@ mail_imap_port: 993
 mail_username: "emailadress"
 mail_name: "name for the account"
 
+ppl_sso: false
+ppl_sso_client_id: "clientidfromoauthprovidergoeshere"
+ppl_sso_secret: "secretfromoauthprovidergoeshere"
+ppl_sso_base_url: "callbackurlfromoauthprovidergoeshere"
+
 delete_all_doc_types: false
 cleansetag: "is_cleansed"
 # Switch to false to enable the cleansing of titles based on the rules in cleanse_doc_titles.yml

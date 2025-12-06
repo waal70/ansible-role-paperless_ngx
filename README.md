@@ -25,6 +25,12 @@ Commands used to export the documents:
 document_exporter ../export -f -nt -d -p
 ```
 
+Or, to include thumbnails:
+
+```bash
+document_exporter ../export -f -d -p
+```
+
 Command to import:
 
 ```bash
