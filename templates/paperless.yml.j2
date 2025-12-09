@@ -18,13 +18,21 @@ services:
       POSTGRES_PASSWORD: "{{ ppl_dbpassword }}"
     networks:
       - paperless_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "paperless"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
     container_name: ppl-web
-    restart: on-failure
-    depends_on:
-      - db
-      - broker
+    restart: unless-stopped
+  depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      broker:
+        condition: service_started
     ports:
       - 8010:8000
     healthcheck:
