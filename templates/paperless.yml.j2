@@ -27,7 +27,7 @@ services:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
     container_name: ppl-web
     restart: unless-stopped
-  depends_on:
+    depends_on:
       db:
         condition: service_healthy
         restart: true
