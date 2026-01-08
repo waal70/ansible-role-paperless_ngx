@@ -33,9 +33,9 @@ services:
         restart: true
       broker:
         condition: service_started
-    # Uncomment the following lines to enable port mapping instead of using a reverse proxy
-    # ports:
-    #  - 8010:8000
+    # Uncomment the following lines to enable port mapping instead of using a reverse proxy or if you wish to use the API directly
+    ports:
+     - 8010:8000
     healthcheck:
       test: ["CMD", "curl", "-fs", "-S", "--max-time", "2", "http://localhost:8000"]
       interval: 30s

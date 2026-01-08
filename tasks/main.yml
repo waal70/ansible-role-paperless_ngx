@@ -74,7 +74,7 @@
 
 - name: "Wait for stack to be fully started by querying the /schema/view/ endpoint"
   ansible.builtin.uri:
-    url: "{{ ppl_endpoint }}/schema/view/"
+    url: "{{ ppl_endpoint }}schema/view/"
     method: GET
     validate_certs: false
   register: wait_ppl_result
