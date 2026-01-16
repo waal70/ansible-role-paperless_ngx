@@ -11,48 +11,12 @@
         - "{{ lookup('env', 'PRIVATE_REPO') | default('~') }}/ansible-vault/{{ ansible_role_name }}-vars.yml"
       skip: true
 
-- name: "Block for folder mapping"
-  when: (cifs_consume_path is defined) and (cifs_export_path is defined)
-  block:
-    - name: "Ensure nfs package is installed"
-      ansible.builtin.package:
-        name: nfs-kernel-server
-        state: present
-    - name: "Ensure consume path exists"
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: directory
-        owner: "nobody"
-        group: "nogroup"
-        mode: '0777'
-      with_items:
-        - "{{ cifs_consume_path }}"
-        - "{{ cifs_export_path }}"
-    - name: "Configure nfs-utils with correct exports"
-      ansible.builtin.lineinfile:
-        path: /etc/exports
-        line: "{{ item }} 172.16.10.2(rw,sync,no_subtree_check,no_root_squash)"
-        state: present
-        create: true
-        mode: '0644'
-      with_items:
-        - "{{ cifs_consume_path }}"
-        - "{{ cifs_export_path }}"
-    - name: "Enable and start NFS services"
-      ansible.builtin.service:
-        name: nfs-server
-        state: restarted
-        enabled: true
-  rescue:
-    - name: "A failure in the above block most likely means a restart is required"
-      ansible.builtin.reboot:
-        post_reboot_delay: 60
-    - name: "Retry enable and start NFS"
-      ansible.builtin.service:
-        name: nfs-server
-        state: restarted
-        enabled: true
-# END Block for consumption and export mapping
+- name: "Delegate creation of exports to waal70.nfs"
+  ansible.builtin.include_role:
+    name: waal70.nfs
+  vars:
+    nfs_exports: ['{{ cifs_consume_path }} 172.16.10.2(rw,sync,no_subtree_check,no_root_squash)',
+                  '{{ cifs_export_path }} 172.16.10.2(rw,sync,no_subtree_check,no_root_squash)']
 
 - name: "Template the paperless.yml file to the role's files/ directory"
   ansible.builtin.template:

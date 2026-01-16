@@ -101,7 +101,7 @@ services:
       - paperless_network
     volumes:
       - /appdata/ppl/data:/usr/src/paperless/data
-      - /media/ppl:/usr/src/paperless/media
+      - /media/ppl/assets:/usr/src/paperless/media
       - {{ cifs_export_path }}:/usr/src/paperless/export
       - {{ cifs_consume_path }}:/usr/src/paperless/consume
 networks:
