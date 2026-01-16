@@ -5,7 +5,7 @@ services:
       - paperless_network
     restart: unless-stopped
     volumes:
-      - /appdata/redisdata:/data
+      - /appdata/ppl/redisdata:/data
   db:
     image: docker.io/library/postgres:17
     restart: unless-stopped
@@ -100,7 +100,7 @@ services:
       - default
       - paperless_network
     volumes:
-      - /data/ppl:/usr/src/paperless/data
+      - /appdata/ppl/data:/usr/src/paperless/data
       - /media/ppl:/usr/src/paperless/media
       - {{ cifs_export_path }}:/usr/src/paperless/export
       - {{ cifs_consume_path }}:/usr/src/paperless/consume
