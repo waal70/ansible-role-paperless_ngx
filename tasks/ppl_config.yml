@@ -1,0 +1,32 @@
+---
+# To be expanded with an extra check: if the count of currently configured
+# custom fields, correspondents etc. is not changed, do not include the tasks
+- name: "Block to do configuration. Do not perform this when restoring from export."
+  when: ppl_do_config
+  block:
+    - name: "Include tasks to create custom fields"
+      ansible.builtin.include_tasks: cf_main.yml
+
+    - name: "Include tasks to handle document types"
+      ansible.builtin.include_tasks: doc_type_main.yml
+
+    - name: "Include tasks to handle correspondents"
+      ansible.builtin.include_tasks: correspondent_main.yml
+
+    - name: "Include tasks to handle tags"
+      ansible.builtin.include_tasks: tags_main.yml
+
+    - name: "Include tasks to handle e-mail settings"
+      ansible.builtin.include_tasks: mail.yml
+      when: "'@' in mail_username"
+
+    - name: "Include tasks to create Storage Paths"
+      ansible.builtin.include_tasks: sp_main.yml
+
+    - name: "Include tasks to create workflows"
+      ansible.builtin.include_tasks: wf_main.yml
+
+    - name: "Include task to cleanse document titles"
+      ansible.builtin.include_tasks: cleanse_doc_titles.yml
+      when: cleanse_titles | bool
+# END Block to do configuration
