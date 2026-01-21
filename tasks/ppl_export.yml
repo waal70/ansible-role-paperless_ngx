@@ -16,9 +16,9 @@
 - name: "Schedule a regular export in cron"
   ansible.builtin.cron:
     name: "paperless-ngx export"
-    weekday: "6"
+    weekday: "*"
     minute: "0"
-    hour: "5"
+    hour: "21"
     user: "{{ docker_exec_user }}"
     job: "/usr/bin/docker exec -t ppl-web {{ ppl_export_cmd }} >> /home/{{ docker_exec_user }}/crontab.log 2>&1"
     state: "present"
