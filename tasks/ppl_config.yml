@@ -1,6 +1,28 @@
 ---
 # To be expanded with an extra check: if the count of currently configured
 # custom fields, correspondents etc. is not changed, do not include the tasks
+- name: "Request some info from the API for counts of config"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}statistics/"
+    method: GET
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    status_code:
+      - 200
+  register: stats_result
+
+- name: "Populate a variable to get workflow count, setting page_size to as small as possible"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}workflows/?page_size=1"
+    method: GET
+    validate_certs: false
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    status_code:
+      - 200
+  register: workflow_result
+
 - name: "Block to do configuration. Do not perform this when restoring from export."
   when: ppl_do_config
   block:
@@ -9,12 +31,15 @@
 
     - name: "Include tasks to handle document types"
       ansible.builtin.include_tasks: doc_type_main.yml
+      when: stats_result.json.document_type_count != doc_types | length
 
     - name: "Include tasks to handle correspondents"
       ansible.builtin.include_tasks: correspondent_main.yml
+      when: stats_result.json.correspondent_count != correspondents | length
 
-    - name: "Include tasks to handle tags"
+    - name: "Include tasks to handle tags, compensating for INBOX tag"
       ansible.builtin.include_tasks: tags_main.yml
+      when: stats_result.json.tag_count != ppl_tags | length + 1
 
     - name: "Include tasks to handle e-mail settings"
       ansible.builtin.include_tasks: mail.yml
@@ -22,9 +47,11 @@
 
     - name: "Include tasks to create Storage Paths"
       ansible.builtin.include_tasks: sp_main.yml
+      when: stats_result.json.storage_path_count != storagepaths | length
 
     - name: "Include tasks to create workflows"
       ansible.builtin.include_tasks: wf_main.yml
+      when: workflow_result.json.count != (consumption_workflows + consumption_workflow_corr + tagging_workflows + notification_workflows) | length
 
     - name: "Include task to cleanse document titles"
       ansible.builtin.include_tasks: cleanse_doc_titles.yml
