@@ -17,8 +17,8 @@
   ansible.builtin.cron:
     name: "paperless-ngx export"
     weekday: "*"
-    minute: "0"
-    hour: "21"
+    minute: "15"
+    hour: "22"
     user: "{{ docker_exec_user }}"
     job: "/usr/bin/docker exec -t ppl-web {{ ppl_export_cmd }} >> /home/{{ docker_exec_user }}/crontab.log 2>&1"
     state: "present"
