@@ -47,17 +47,6 @@
   delay: 10
   changed_when: false
 
-- name: "Return the paperless yaml back to its placeholder version"
-  ansible.builtin.copy:
-    src: paperless.yml.placeholder
-    dest: "{{ role_path }}/files/paperless.yml"
-    owner: "{{ interactive_user }}"
-    group: "{{ interactive_user }}"
-    mode: '0644'
-    remote_src: false
-    force: true
-  delegate_to: localhost
-
 - name: "Generate authentication token for user ID {{ ppl_user }} on {{ ppl_endpoint }}" # noqa: name[template]
   ansible.builtin.uri:
     url: "{{ ppl_endpoint }}token/"
