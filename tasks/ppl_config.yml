@@ -28,6 +28,7 @@
   block:
     - name: "Include tasks to create custom fields"
       ansible.builtin.include_tasks: cf_main.yml
+      when: stats_result.json.tag_count != ppl_tags | length + 1
 
     - name: "Include tasks to handle document types"
       ansible.builtin.include_tasks: doc_type_main.yml
