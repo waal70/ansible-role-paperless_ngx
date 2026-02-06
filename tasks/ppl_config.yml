@@ -52,7 +52,7 @@
 
     - name: "Include tasks to create workflows"
       ansible.builtin.include_tasks: wf_main.yml
-      when: workflow_result.json.count != (consumption_workflows + consumption_workflow_corr + tagging_workflows + notification_workflows) | length
+      when: workflow_result.json.count != (consumption_workflows + consumption_workflow_corr + tagging_workflows + notification_workflows) | length +1
 
     - name: "Include task to cleanse document titles"
       ansible.builtin.include_tasks: cleanse_doc_titles.yml

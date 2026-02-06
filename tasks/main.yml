@@ -76,7 +76,7 @@
 
 - name: "Setting ppl_owner - query the user ID for user {{ ppl_user }}" # noqa: name[template]
   ansible.builtin.uri:
-    url: "{{ ppl_endpoint }}users/?username={{ ppl_user }}"
+    url: "{{ ppl_endpoint }}users/?username__iexact={{ ppl_user }}"
     method: GET
     validate_certs: false
     headers:
@@ -90,6 +90,9 @@
 - name: "Set ppl_owner fact"
   ansible.builtin.set_fact:
     ppl_owner: "{{ ppl_user_response.json.results[0].id }}"
+
+- name: "Ensure user groups are present"
+  ansible.builtin.include_tasks: ppl_groups.yml
 
 - name: "Set some config on {{ ppl_endpoint }}"
   ansible.builtin.uri:

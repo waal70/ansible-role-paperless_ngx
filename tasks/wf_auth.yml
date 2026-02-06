@@ -1,0 +1,48 @@
+---
+- name: "Set the name for this workflow"
+  ansible.builtin.set_fact:
+    wf_auth_name: "AWF_Default_Authorization"
+
+- name: "Determine id for view and change groups"
+  ansible.builtin.set_fact:
+    view_groups: "{{ authgroups_response.json | community.general.json_query('results[?name==`ReadOnly`].id') }}"
+    change_groups: "{{ authgroups_response.json | community.general.json_query('results[?name==`RegularUser`].id') }}"
+
+- name: "Debug"
+  ansible.builtin.debug:
+    msg: "vg is {{ view_groups }}, cg is {{ change_groups }}"
+
+- name: "Create the default workflow"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}workflows/"
+    method: POST
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body: {
+      "name": "{{ wf_auth_name }}",
+      "enabled": false,
+      "triggers": [
+        {
+          "type": 3,
+          "matching_algorithm": 0,
+          "match": ""
+        }
+      ],
+      "actions": [
+        {
+          "type": 1,
+          "assign_owner": "{{ ppl_owner }}",
+          "assign_view_groups": "{{ view_groups }}",
+          "assign_change_groups": "{{ change_groups }}"
+        }
+      ]
+    }
+    status_code:
+      - 201
+  when: "(wf_auth_name not in wf_response.json.results | map(attribute='name') | list)"
+  register: _result
+  until: _result.status == 201
+  retries: 3
+  delay: 5

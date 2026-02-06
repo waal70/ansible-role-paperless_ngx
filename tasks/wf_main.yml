@@ -52,6 +52,17 @@
         headers:
           Authorization: "Token {{ auth_token }}"
       register: tags_response
+
+    - name: Retrieve authorization groups
+      ansible.builtin.uri:
+        url: "{{ ppl_endpoint }}groups/"
+        method: GET
+        headers:
+          Authorization: "Token {{ auth_token }}"
+        validate_certs: false
+        status_code:
+          - 200
+      register: authgroups_response
 ### END BLOCK
 
 - name: "Create consumption workflows"
@@ -95,3 +106,6 @@
     wf_message: "{{ item[3] }}"
   with_items:
     - "{{ notification_workflows }}"
+
+- name: "Create workflow for default authorizations"
+  ansible.builtin.include_tasks: wf_auth.yml

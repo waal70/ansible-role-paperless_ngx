@@ -1,0 +1,18 @@
+---
+- name: "Get information on current authorization groups"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}groups/"
+    method: GET
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    status_code:
+      - 200
+  register: authgroups
+
+- name: "Include task to create the group if it does not exist yet"
+  ansible.builtin.include_tasks: ppl_group_create.yml
+  vars:
+    groupname: "{{ item.name }}"
+    permissions: "{{ item.permissions }}"
+  with_items: "{{ ppl_groups }}"

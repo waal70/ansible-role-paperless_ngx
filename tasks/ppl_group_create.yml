@@ -1,0 +1,15 @@
+---
+- name: "Create authorization group if it does not exist yet"
+  ansible.builtin.uri:
+    url: "{{ ppl_endpoint }}groups/"
+    method: POST
+    headers:
+      Authorization: "Token {{ auth_token }}"
+    validate_certs: false
+    body_format: json
+    body:
+      name: "{{ groupname }}"
+      permissions: "{{ permissions }}"
+    status_code:
+      - 201
+  when: "(groupname not in authgroups.json.results | map(attribute='name') | list)"
