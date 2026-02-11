@@ -106,6 +106,7 @@
     wf_message: "{{ item[3] }}"
   with_items:
     - "{{ notification_workflows }}"
+  when: "stage == 'production'"
 
 - name: "Create workflow for default authorizations"
   ansible.builtin.include_tasks: wf_auth.yml
