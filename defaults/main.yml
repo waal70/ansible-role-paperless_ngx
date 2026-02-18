@@ -30,7 +30,7 @@ ppl_user: "ppl"
 ppl_password: "ppl"
 ppl_dbpassword: "paperlessdb"
 # This controls rolling out the config
-ppl_do_config: true
+ppl_do_config: false
 # This controls the making of a database export
 ppl_export: false
 # This controls whether to make the cron job for the export
