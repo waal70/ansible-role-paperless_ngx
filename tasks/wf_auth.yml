@@ -8,10 +8,6 @@
     view_groups: "{{ authgroups_response.json | community.general.json_query('results[?name==`ReadOnly`].id') }}"
     change_groups: "{{ authgroups_response.json | community.general.json_query('results[?name==`RegularUser`].id') }}"
 
-- name: "Debug"
-  ansible.builtin.debug:
-    msg: "vg is {{ view_groups }}, cg is {{ change_groups }}"
-
 - name: "Create the default workflow"
   ansible.builtin.uri:
     url: "{{ ppl_endpoint }}workflows/"
