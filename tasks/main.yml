@@ -15,8 +15,8 @@
   ansible.builtin.include_role:
     name: waal70.nfs
   vars:
-    nfs_exports: ['{{ cifs_consume_path }} 172.16.10.2(rw,sync,no_subtree_check,no_root_squash)',
-                  '{{ cifs_export_path }} 172.16.10.2(rw,sync,no_subtree_check,no_root_squash)']
+    nfs_exports: ['{{ cifs_consume_path }} {{ ppl_nfs_allowedclients }}{{ ppl_nfs_options }}',
+                  '{{ cifs_export_path }} {{ ppl_nfs_allowedclients }}{{ ppl_nfs_options }}']
 
 - name: "Template the paperless.yml file to the role's files/ directory"
   ansible.builtin.template:

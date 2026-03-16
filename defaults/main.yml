@@ -26,6 +26,9 @@ cleanse_titles: true
 cifs_consume_path: "/mountpointhere"
 cifs_export_path: "/mountpointexport"
 
+ppl_nfs_options: "(rw,sync,no_subtree_check,no_root_squash)"
+ppl_nfs_allowedclients: "1.2.3.4"
+
 ppl_user: "ppl"
 ppl_password: "ppl"
 ppl_dbpassword: "paperlessdb"
