@@ -64,7 +64,7 @@ services:
       {% endraw -%}
       PAPERLESS_FILENAME_FORMAT_REMOVE_NONE: true
       PAPERLESS_FILENAME_DATE_ORDER: YMD
-      PAPERLESS_TIME_ZONE: Europe/Amsterdam
+      PAPERLESS_TIME_ZONE: {{ site_timezone }}
       PAPERLESS_CONSUMER_POLLING: 10
       PAPERLESS_CONSUMER_RECURSIVE: true
       PAPERLESS_TASK_WORKERS: 2
@@ -100,8 +100,8 @@ services:
       - default
       - paperless_network
     volumes:
-      - /appdata/ppl/data:/usr/src/paperless/data
-      - /media/ppl/assets:/usr/src/paperless/media
+      - {{ service_data }}/data:/usr/src/paperless/data
+      - {{ service_media }}/assets:/usr/src/paperless/media
       - {{ cifs_export_path }}:/usr/src/paperless/export
       - {{ cifs_consume_path }}:/usr/src/paperless/consume
 networks:

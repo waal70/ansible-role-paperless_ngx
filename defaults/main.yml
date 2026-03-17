@@ -1,5 +1,10 @@
 ---
 # defaults file for waal70.paperless-ngx
+# These should be overriden from your site's group_vars/all.yml
+service_data: "fixme"
+service_db: "fixmetoo"
+service_name: "forgottooverride"
+
 auth_token: "auth_token_in_vaulted vars"
 # If you run this on the host where paperless-ngx is running, this should be localhost
 ppl_base: "http://localhost:8010"
@@ -46,7 +51,7 @@ ppl_export_cmd: "document_exporter -p -f -nt -d ../export"
 backup_tasks: [
   "/usr/bin/docker exec -t ppl-web {{ ppl_export_cmd }}"
 ]
-backup_folder: "/media/ppl"
+backup_folder: "{{ service_media }}"
 # backup_pattern: "db_*_*.sqlite3" not used in case of ppl
 
 ppl_domain: "yourdomain.here" # without http(s):// and without a trailing slash
