@@ -1,17 +1,15 @@
 ---
-- name: "Set fact for user to run docker exec under"
+- name: "Set fact for user to run the backup tasks under"
   ansible.builtin.set_fact:
     docker_exec_user: "{{ ansible_facts['env'].SUDO_USER | default(ansible_facts['env'].USER, true) | default(ansible_facts['user_id'], true) }}"
 
-- name: Run the command that will export the paperless database
-  community.docker.docker_container_exec:
-    container: ppl-web
-    command: "{{ ppl_export_cmd }}"
-    docker_host: unix:///run/docker.sock
-  register: export_result
-  become: true
-  become_user: "{{ docker_exec_user }}"
-  when: ppl_export | bool
+- name: "Template out the backup shell script to the appropriate folder"
+  ansible.builtin.template:
+    src: backup_ppl.sh.j2
+    dest: "{{ backup_folder }}/backup_ppl.sh"
+    owner: "{{ docker_exec_user }}"
+    group: "{{ docker_exec_user }}"
+    mode: "0744"
 
 - name: "Schedule a regular export in cron"
   ansible.builtin.cron:
@@ -20,6 +18,6 @@
     minute: "15"
     hour: "22"
     user: "{{ docker_exec_user }}"
-    job: "/usr/bin/docker exec -t ppl-web {{ ppl_export_cmd }} >> /home/{{ docker_exec_user }}/crontab.log 2>&1"
+    job: "{{ backup_folder }}/backup_ppl.sh >> /home/{{ docker_exec_user }}/crontab.log 2>&1"
     state: "present"
   when: ppl_export_schedule | bool

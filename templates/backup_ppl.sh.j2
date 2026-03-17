@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# ------------------------------------------------------------
+# The script performs backup tasks
+# ------------------------------------------------------------
+
+set -euo pipefail   # safer scripting
+
+# Backup tasks (e.g. stopping a container, running a command in docker)
+{% for task in backup_tasks %}
+{{ task }}
+{% endfor %}
+
+echo "Backup done."

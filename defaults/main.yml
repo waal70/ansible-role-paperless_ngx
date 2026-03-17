@@ -43,6 +43,11 @@ ppl_export_schedule: true
 # Should you not have exported thumbnails (-nt), you can regenerate them through:
 # docker exec -it ppl-web document_thumbnails
 ppl_export_cmd: "document_exporter -p -f -nt -d ../export"
+backup_tasks: [
+  "/usr/bin/docker exec -t ppl-web {{ ppl_export_cmd }}"
+]
+backup_folder: "/media/ppl"
+# backup_pattern: "db_*_*.sqlite3" not used in case of ppl
 
 ppl_domain: "yourdomain.here" # without http(s):// and without a trailing slash
 
